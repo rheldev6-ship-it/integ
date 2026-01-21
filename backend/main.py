@@ -12,6 +12,7 @@ from contextlib import asynccontextmanager
 
 # Import database initialization
 from .config import init_db
+from .api import auth
 
 # Lifespan context for startup/shutdown
 @asynccontextmanager
@@ -54,7 +55,10 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
-    allow_headers=["*"],
+ 
+
+# Include API routers
+app.include_router(auth.router)   allow_headers=["*"],
 )
 
 
