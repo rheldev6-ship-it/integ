@@ -50,47 +50,42 @@
 
 ## Developer Workflows
 
-### **Quick Dev Setup** (5 minutes)
+### **Quick Dev Setup** (5 minutes - SQLite/Local Only)
 
-**Option A: With Docker (Recommended)**
 ```bash
 cd ~/Masaüstü/Projects/integ
 cp .env.example .env
 
+# Install dependencies (no external services needed!)
+pip install -e ".[dev]"
+
+# Run backend with SQLite
+export PYTHONPATH=/home/longstone/Masaüstü/Projects/integ
+uvicorn backend.main:app --reload --log-level info
+# Backend: http://localhost:8000/docs
+```
+
+**That's it!** SQLite database creates automatically on first run as `integ.db`.
+
+### **Production Setup** (with Docker - PostgreSQL + Redis)
+
+For production deployment:
+
+```bash
 # Start services (PostgreSQL, Redis, Backend)
 docker-compose up -d
 
-# Install dependencies
-pip install -e ".[dev]"
+# Install production dependencies
+pip install -e ".[dev,backend]"
 
-# Verify backend at http://localhost:8000/docs
+# Run migrations
+alembic upgrade head
+
+# Start backend
+PYTHONPATH=$PWD uvicorn backend.main:app --workers 4
 ```
 
-**Option B: Without Docker (Local PostgreSQL/Redis)**
-```bash
-cd ~/Masaüstü/Projects/integ
-cp .env.example .env
-
-# Install PostgreSQL and Redis (Fedora)
-sudo dnf install postgresql-server redis
-
-# Start services
-sudo systemctl start postgresql redis
-
-# Create database
-createdb integ_db
-psql integ_db -c "CREATE USER integ_user WITH PASSWORD 'integ_password';"
-psql integ_db -c "ALTER ROLE integ_user CREATEDB;"
-
-# Install dependencies
-pip install -e ".[dev]"
-
-# Update .env with local database URL
-# DATABASE_URL=postgresql://integ_user:integ_password@localhost:5432/integ_db
-# REDIS_URL=redis://localhost:6379/0
-
-# Verify backend at http://localhost:8000/docs
-```
+See `.env.example` for PostgreSQL configuration.
 
 ### **Run Backend Locally**
 

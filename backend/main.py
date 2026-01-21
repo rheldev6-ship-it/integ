@@ -8,14 +8,32 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 import os
+from contextlib import asynccontextmanager
 
-# Initialize FastAPI app
+# Import database initialization
+from .config import init_db
+
+# Lifespan context for startup/shutdown
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handle app startup and shutdown."""
+    # Startup
+    print("🚀 Integ Backend starting...")
+    init_db()  # Create tables if they don't exist
+    print("✅ Database initialized")
+    yield
+    # Shutdown
+    print("⛔ Integ Backend shutting down...")
+
+
+# Initialize FastAPI app with lifespan
 app = FastAPI(
     title="Integ API",
     description="Unified GOG & Steam game integration platform for Linux",
     version="0.1.0",
     docs_url="/docs",
     redoc_url="/redoc",
+    lifespan=lifespan,
 )
 
 # CORS middleware for frontend communication
