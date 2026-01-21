@@ -1,7 +1,7 @@
 """
 Authentication API endpoints - OAuth2 callbacks and login.
 """
-from fastapi import APIRouter, Query, HTTPException, Depends
+from fastapi import APIRouter, Request, HTTPException, Depends
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from typing import Optional
@@ -37,7 +37,7 @@ async def steam_login():
 
 @router.get("/auth/steam/callback")
 async def steam_callback(
-    request_query: dict = Query(...),
+    request: Request,
     db: Session = Depends(get_db)
 ) -> LoginResponse:
     """
@@ -46,7 +46,7 @@ async def steam_callback(
     Verifies Steam ID, creates/updates user in database, and returns JWT token.
     
     Args:
-        request_query: Query parameters from Steam
+        request: FastAPI request object (contains query params)
         db: Database session
     
     Returns:
@@ -55,8 +55,11 @@ async def steam_callback(
     Raises:
         HTTPException: If verification fails
     """
+    # Convert query params to dict
+    query_params = dict(request.query_params)
+    
     # Verify callback with Steam
-    steam_id = await SteamProvider.verify_callback(request_query)
+    steam_id = await SteamProvider.verify_callback(query_params)
     
     if not steam_id:
         raise HTTPException(status_code=401, detail="Steam verification failed")

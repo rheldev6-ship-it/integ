@@ -8,7 +8,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from datetime import datetime
 
-from .config import Base
+from ..config import Base
 
 
 class User(Base):

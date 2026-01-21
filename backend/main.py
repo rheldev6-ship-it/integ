@@ -55,11 +55,11 @@ app.add_middleware(
     allow_origins=allowed_origins,
     allow_credentials=True,
     allow_methods=["*"],
- 
+    allow_headers=["*"],
+)
 
 # Include API routers
-app.include_router(auth.router)   allow_headers=["*"],
-)
+app.include_router(auth.router)
 
 
 @app.get("/")
