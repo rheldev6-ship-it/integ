@@ -52,19 +52,44 @@
 
 ### **Quick Dev Setup** (5 minutes)
 
+**Option A: With Docker (Recommended)**
 ```bash
 cd ~/Masaüstü/Projects/integ
 cp .env.example .env
 
-# Start services (PostgreSQL, Redis)
+# Start services (PostgreSQL, Redis, Backend)
 docker-compose up -d
 
 # Install dependencies
 pip install -e ".[dev]"
 
-# Verify backend
-PYTHONPATH=$PWD uvicorn backend.main:app --reload
-# Open http://localhost:8000/docs
+# Verify backend at http://localhost:8000/docs
+```
+
+**Option B: Without Docker (Local PostgreSQL/Redis)**
+```bash
+cd ~/Masaüstü/Projects/integ
+cp .env.example .env
+
+# Install PostgreSQL and Redis (Fedora)
+sudo dnf install postgresql-server redis
+
+# Start services
+sudo systemctl start postgresql redis
+
+# Create database
+createdb integ_db
+psql integ_db -c "CREATE USER integ_user WITH PASSWORD 'integ_password';"
+psql integ_db -c "ALTER ROLE integ_user CREATEDB;"
+
+# Install dependencies
+pip install -e ".[dev]"
+
+# Update .env with local database URL
+# DATABASE_URL=postgresql://integ_user:integ_password@localhost:5432/integ_db
+# REDIS_URL=redis://localhost:6379/0
+
+# Verify backend at http://localhost:8000/docs
 ```
 
 ### **Run Backend Locally**
